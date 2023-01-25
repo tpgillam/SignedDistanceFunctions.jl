@@ -138,4 +138,24 @@ function signed_distance(g::UnionGeometry{D}, x::NTuple{D,Float64}) where {D}
     end
 end
 
+struct IntersectionGeometry{D} <: Geometry{D}
+    components::Vector{<:Geometry{D}}
+end
+
+"""
+    intersect(g::Geometry, rest...)
+
+Create a geometry which is the intersection of all given geometries.
+"""
+Base.intersect(g::Geometry) = g
+function Base.intersect(g::Geometry{D}, rest::Geometry{D}...) where {D}
+    return IntersectionGeometry{D}([g, rest...])
+end
+
+function signed_distance(g::IntersectionGeometry{D}, x::NTuple{D,Float64}) where {D}
+    return maximum(g.components) do geometry
+        signed_distance(geometry, x)
+    end
+end
+
 end
