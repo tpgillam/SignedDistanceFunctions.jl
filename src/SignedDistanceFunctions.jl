@@ -4,12 +4,16 @@ module SignedDistanceFunctions
 export CentredGeometry, Geometry
 
 # Simple geometries.
-export Sphere
+export Cube, Sphere
 
 # Functional API
 export scale, shift, signed_distance
 
 using LinearAlgebra
+
+# TODO Switch to using SVector rather than bare Tuples, since it is slightly closer to what
+#   we mean semantically. It is also more likely to have optimised & inlining versions of
+#   base & linear algebra routines.
 
 # TODO Generalise for arbitrary float types
 
@@ -35,7 +39,7 @@ Get the signed distance from position `x` to `geometry`.
 
 # Args
 * `geometry::Geometry{D}`: An object representing the geometry.
-* `x::NTuple{AbstractFloat,D}`: The position in space.
+* `x::NTuple{Real,D}`: The position in space.
 """
 function signed_distance end
 
@@ -44,13 +48,27 @@ function signed_distance end
 ############################
 
 """
+    Cube{D}
+
+The unit cube centred on the origin in `D` dimensions.
+"""
+struct Cube{D} <: CentredGeometry{D} end
+
+function signed_distance(::Cube{D}, x::NTuple{D,Real}) where {D}
+    q = @. abs(x) - 0.5
+    # The first component is >= 0 iff x is outside the cube.
+    # The second component is zero outside the cube, but is negative inside the cube.
+    return norm(max.(q, 0.0)) + min(maximum(q), 0.0)
+end
+
+"""
     Sphere{D}
 
-The unit sphere in `D` dimensions.
+The unit sphere centred on the origin in `D` dimensions.
 """
 struct Sphere{D} <: CentredGeometry{D} end
 
-signed_distance(::Sphere{D}, x::NTuple{D,AbstractFloat}) where {D} = norm(x) - 1.0
+signed_distance(::Sphere{D}, x::NTuple{D,Real}) where {D} = norm(x) - 1.0
 
 # TODO we need to ensure that we don't nest these geometry objects too deeply, since
 #   otherwise we will suffer greatly when compiling this code.
@@ -83,7 +101,7 @@ function scale(g::Geometry{D}, factor::NTuple{D,Float64}) where {D}
     return AnisotropicScale{D,typeof(g)}(g, factor)
 end
 
-function signed_distance(scale::Scale{D}, x::NTuple{D,AbstractFloat}) where {D}
+function signed_distance(scale::Scale{D}, x::NTuple{D,Real}) where {D}
     return signed_distance(scale.parent, x ./ scale.factor)
 end
 
@@ -96,7 +114,7 @@ end
 
 shift(g::Geometry{D}, delta::NTuple{D,Float64}) where {D} = Shift{D,typeof(g)}(g, delta)
 
-function signed_distance(shift::Shift{D}, x::NTuple{D,AbstractFloat}) where {D}
+function signed_distance(shift::Shift{D}, x::NTuple{D,Real}) where {D}
     return signed_distance(shift.parent, x .- shift.delta)
 end
 
