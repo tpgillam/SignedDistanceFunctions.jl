@@ -5,3 +5,6 @@
 /Manifest.toml
 /docs/Manifest.toml
 /docs/build/
+
+# Jupyter temporary files
+.ipynb_checkpoints
