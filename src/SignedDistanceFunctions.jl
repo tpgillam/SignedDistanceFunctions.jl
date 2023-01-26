@@ -15,6 +15,10 @@ using LinearAlgebra
 #   we mean semantically. It is also more likely to have optimised & inlining versions of
 #   base & linear algebra routines.
 
+# TODO In many places we want to be able to play nicely with abstract array types, e.g.
+#   CUDA arrays. Perhaps there are also optimised types for dealing with short / known
+#   length vectors?
+
 # TODO Generalise for arbitrary float types
 
 """
