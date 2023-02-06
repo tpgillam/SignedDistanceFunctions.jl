@@ -8,9 +8,14 @@
 [![ColPrac: Contributor's Guide on Collaborative Practices for Community Packages](https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet)](https://github.com/SciML/ColPrac)
 
 ## References
-
 Inspiration from:
 * https://iquilezles.org/articles/distfunctions/
 * https://github.com/stevengj/GeometryPrimitives.jl
 * https://github.com/marklundin/glsl-sdf-ops
 * https://github.com/marklundin/glsl-sdf-primitives
+
+## Other resources
+Might be useful:
+* https://github.com/zoemcc/Raytracing.jl
+* https://github.com/zoemcc/SignedDistanceFunctions.jl
+* https://github.com/plut/ConstructiveGeometry.jl
