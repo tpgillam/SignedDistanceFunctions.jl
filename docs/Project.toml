@@ -1,3 +1,6 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 SignedDistanceFunctions = "5d155b53-3349-4453-ad1f-ebdf13404c93"
+
+[compat]
+Documenter = "1"
