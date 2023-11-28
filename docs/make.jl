@@ -1,7 +1,9 @@
 using SignedDistanceFunctions
 using Documenter
 
-DocMeta.setdocmeta!(SignedDistanceFunctions, :DocTestSetup, :(using SignedDistanceFunctions); recursive=true)
+DocMeta.setdocmeta!(
+    SignedDistanceFunctions, :DocTestSetup, :(using SignedDistanceFunctions); recursive=true
+)
 
 makedocs(;
     modules=[SignedDistanceFunctions],
@@ -14,13 +16,8 @@ makedocs(;
         edit_link="main",
         assets=String[],
     ),
-    pages=[
-        "Home" => "index.md",
-    ],
+    pages=["Home" => "index.md"],
     checkdocs=:exports,
 )
 
-deploydocs(;
-    repo="github.com/tpgillam/SignedDistanceFunctions.jl",
-    devbranch="main",
-)
+deploydocs(; repo="github.com/tpgillam/SignedDistanceFunctions.jl", devbranch="main")
