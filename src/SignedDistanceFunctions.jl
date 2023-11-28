@@ -91,19 +91,19 @@ function signed_distance(scale::Scale{D}, x::NTuple{D,Real}) where {D}
     return signed_distance(scale.parent, x ./ scale.factor)
 end
 
-
 struct Shift{D,G<:Geometry{D}} <: Geometry{D}
     parent::G
     delta::NTuple{D,Float64}
 end
 
 shift(g::Geometry{D}, delta::NTuple{D,Float64}) where {D} = Shift{D,typeof(g)}(g, delta)
+function shift(g::Shift{D}, delta::NTuple{D,Float64}) where {D}
+    return typeof(g)(g.parent, g.delta + delta)
+end
 
 function signed_distance(shift::Shift{D}, x::NTuple{D,Real}) where {D}
     return signed_distance(shift.parent, x .- shift.delta)
 end
-
-# TODO optimise shifting a shift object
 
 struct UnionGeometry{D} <: Geometry{D}
     components::Vector{<:Geometry{D}}
@@ -121,6 +121,10 @@ function signed_distance(g::UnionGeometry{D}, x::NTuple{D,Float64}) where {D}
     min = minimum(g.components) do geometry
         signed_distance(geometry, x)
     end
+    # Interiors are not guaranteed to be correct if any shapes overlap anywhere. It is not
+    #   sufficient to only check for overlaps at the point `x`!
+    #   TODO: we could potentially determine some cases of unions that are non-overlapping,
+    #       when it would be correct to provide the interior.
     return min < 0 ? missing : min
 end
 
