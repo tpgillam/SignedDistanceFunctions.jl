@@ -73,39 +73,24 @@ signed_distance(::Sphere{D}, x::NTuple{D,Real}) where {D} = norm(x) - 1.0
 # TODO we need to ensure that we don't nest these geometry objects too deeply, since
 #   otherwise we will suffer greatly when compiling this code.
 
-abstract type Scale{D} <: Geometry{D} end
-
-struct IsotropicScale{D,G<:Geometry{D}} <: Scale{D}
+struct Scale{D,G<:Geometry{D}} <: Geometry{D}
     parent::G
     factor::Float64
 end
 
-struct AnisotropicScale{D,G<:Geometry{D}} <: Scale{D}
-    parent::G
-    factor::NTuple{D,Float64}
-end
-
 """
     scale(g::Geometry, factor::Float64)
-    scale(g::Geometry, factor::NTuple)
 
-Scale the given geometry by `factor`.
-
-If the factor is a scalar, this will be a
+Scale the given geometry by `factor` in all dimensions.
+Note that we cannot in general scale an SDF by different factors in different dimensions.
 """
-function scale(g::Geometry{D}, factor::Float64) where {D}
-    return IsotropicScale{D,typeof(g)}(g, factor)
-end
-
-function scale(g::Geometry{D}, factor::NTuple{D,Float64}) where {D}
-    return AnisotropicScale{D,typeof(g)}(g, factor)
-end
+scale(g::Geometry{D}, factor::Float64) where {D} = Scale{D,typeof(g)}(g, factor)
+scale(g::Scale{D}, factor::Float64) where {D} = typeof(g)(g.parent, g.factor * factor)
 
 function signed_distance(scale::Scale{D}, x::NTuple{D,Real}) where {D}
     return signed_distance(scale.parent, x ./ scale.factor)
 end
 
-# TODO optimise scaling a Scale object
 
 struct Shift{D,G<:Geometry{D}} <: Geometry{D}
     parent::G
@@ -133,9 +118,10 @@ Base.union(g::Geometry) = g
 Base.union(g::Geometry{D}, rest::Geometry{D}...) where {D} = UnionGeometry{D}([g, rest...])
 
 function signed_distance(g::UnionGeometry{D}, x::NTuple{D,Float64}) where {D}
-    return minimum(g.components) do geometry
+    min = minimum(g.components) do geometry
         signed_distance(geometry, x)
     end
+    return min < 0 ? missing : min
 end
 
 struct IntersectionGeometry{D} <: Geometry{D}
